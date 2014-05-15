@@ -1,4 +1,5 @@
 import pycosat as psat
+import copy
 
 # You should call this function instead of psat.solve, since the whole point of
 # this assignment is to reconstruct the solve method
@@ -29,10 +30,22 @@ def findsatisfying(formula):
 	if not satdecide(formula):
 		return 'UNSAT'
 
-	variables = findvars(formula)
 	ans = []
-	# your code goes here.  Fill in ans. 
-	# You will probably want to make calls to setvartrue inside of a loop...
+	variables = findvars(formula)
+	form = copy.deepcopy(formula)
+	for var in variables:
+		f = setvartrue(form, var)
+		if f == "UNSAT":
+			f = setvartrue(form, -var)
+			if f == "UNSAT":
+				return "UNSAT"
+			else:
+				ans.append(-var)
+				form = f
+		else:
+			ans.append(var)
+			form = f
+
 	return ans
  
 # TODO: given we want x (which could be something like 2 or the negation -2) 
@@ -42,4 +55,13 @@ def findsatisfying(formula):
 # true.  This property will help a lot in this function, since you might end up 
 # removing elements from lists at some point... 
 def setvartrue(formula, x):
-	pass
+	f = copy.deepcopy(formula)
+	for l in f:
+		for item in l:
+			if item == -x:
+				l.remove(item)
+
+		if len(l) == 0:
+			return "UNSAT"
+
+	return f
