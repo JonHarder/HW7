@@ -26,5 +26,52 @@ does more work, we can say $STINGYSAT$ is at least as hard as $SAT$ and thus $SA
 and because $SAT$ is NP-complete, $STINGYSAT$ must be as well.\\
 
 \section{Decision vs. Search}
+\begin{verbatim}
+def findvars(formula):
+    thevars = set([])
+    for l in formula:
+        for item in l:
+            thevars.add(abs(item))
+
+    return list(thevars)
+
+
+
+def findsatisfying(formula):
+    if not satdecide(formula):
+        return 'UNSAT'
+
+    ans = []
+    variables = findvars(formula)
+    form = copy.deepcopy(formula)
+    for var in variables:
+        f = setvartrue(form, var)
+        if f == "UNSAT":
+            f = setvartrue(form, -var)
+            if f == "UNSAT":
+                return "UNSAT"
+            else:
+                ans.append(-var)
+                form = f
+        else:
+            ans.append(var)
+            form = f
+
+    return ans
+
+
+
+def setvartrue(formula, x):
+    f = copy.deepcopy(formula)
+    for l in f:
+        for item in l:
+            if item == -x:
+                l.remove(item)
+
+        if len(l) == 0:
+            return "UNSAT"
+
+    return f
+\end{verbatim}
 
 \end{document}
