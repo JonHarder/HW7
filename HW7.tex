@@ -1,0 +1,30 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+
+\author{Jon Harder \& Zach Dunn}
+\date{\today}
+\title{Homework 7}
+\begin{document}
+\maketitle
+\section{Undecidability}
+
+\begin{verbatim}
+# HALT(M,w) -> P(something) -> ALWAYSYES(P)
+P(x):
+   if x == 0:
+      M(w); return "yes"
+   else return "yes"
+\end{verbatim}
+
+
+\section{NP-Completeness}
+To reduce $SAT$ to $STINGYSAT$, we can take $\phi$ and pass it unchanged to $STINGYSAT$.  To
+generate $K$, we set it to the number of unique variables present in $\phi$. The $SAT$ problem
+therefore is a more specific instance of $STINGYSAT$ in that $STINGYSAT$ solves a number of problems
+where $SAT$ is only one particular instance.  Because $STINGYSAT$ is a more general problem which
+does more work, we can say $STINGYSAT$ is at least as hard as $SAT$ and thus $SAT \leq STINGYSAT$
+and because $SAT$ is NP-complete, $STINGYSAT$ must be as well.\\
+
+\section{Decision vs. Search}
+
+\end{document}
