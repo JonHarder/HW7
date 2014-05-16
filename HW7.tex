@@ -1,31 +1,74 @@
 \documentclass[11pt, letterpaper]{article}
+
 \usepackage[margin=1in]{geometry}
 
+\newcommand{\solution}[1]{\noindent{\textbf{Solution #1:}}}
+\newcommand{\myskip}{\vskip 0.5in}
+
+\title{CISC 490---Homework \#7 Solutions}
 \author{Jon Harder \& Zach Dunn}
 \date{\today}
-\title{Homework 7}
+
 \begin{document}
 \maketitle
-\section{Undecidability}
+
+\solution{1} \textbf{Undecidability.}
+
+The \texttt{HALT} program is ``simply'' tasked with determining whether a given
+program halts (i.e., eventually stops executing) on a given input. To help us
+solve this problem, we are given the program \texttt{ALWAYSYES} which takes a
+program and tells us whether that program outpus ``yes'' for every input. If we
+want to know whether \texttt{M} halts on \texttt{w}, we have to manipulate it
+somehow so that the \texttt{ALWAYSYES} program can answer our question. To know
+whether \texttt{M} halts on \texttt{w} we simply have to run it once, but how
+can we fit this into a program that will comply with \texttt{ALWAYSYES}'s rules?
+We simply output ``yes'' for every input except for one. In that one instance
+where we do not simply return, we run \texttt{M} on \texttt{w}, then after that
+we return ``yes.'' If indeed \texttt{M} halts on \texttt{w}, then
+\texttt{ALWAYSYES} will itself return ``yes'' because all inputs---including the
+one we picked out---returned ``yes.'' If, however, \texttt{M} does not halt on
+\texttt{w}, then our program \texttt{P} will never reach the point where it
+returns ``yes'' and so \texttt{ALWAYSYES} will return ``no,'' thus solving the
+halting problem.
+
+This is a problem though, because we know from class that solving the halting
+problem is impossible; therefore, any program that solves the halting problem
+must itself be impossible. Below is the function we chose to be put into the
+\texttt{ALWAYSYES} program:
 
 \begin{verbatim}
-# HALT(M,w) -> P(something) -> ALWAYSYES(P)
 P(x):
-   if x == 0:
-      M(w); return "yes"
-   else return "yes"
+    if x == 0:
+        M(w)
+        output "yes"
+    else:
+        output "yes"
 \end{verbatim}
 
+\myskip
 
-\section{NP-Completeness}
-To reduce $SAT$ to $STINGYSAT$, we can take $\phi$ and pass it unchanged to $STINGYSAT$.  To
-generate $K$, we set it to the number of unique variables present in $\phi$. The $SAT$ problem
-therefore is a more specific instance of $STINGYSAT$ in that $STINGYSAT$ solves a number of problems
-where $SAT$ is only one particular instance.  Because $STINGYSAT$ is a more general problem which
-does more work, we can say $STINGYSAT$ is at least as hard as $SAT$ and thus $SAT \leq STINGYSAT$
-and because $SAT$ is NP-complete, $STINGYSAT$ must be as well.\\
+\solution{2} \textbf{NP-Completeness.}
 
-\section{Decision vs. Search}
+To reduce $SAT$ to $STINGYSAT$, we can take $\phi$ and pass it unchanged to
+$STINGYSAT$. To generate $K$, we set it to the number of unique variables
+present in $\phi$. The $SAT$ problem therefore is a more specific instance of
+$STINGYSAT$ in that $STINGYSAT$ solves a number of problems where $SAT$ is only
+one particular instance.  Because $STINGYSAT$ is a more general problem which
+does more work, we can say $STINGYSAT$ is at least as hard as $SAT$ and thus
+$SAT \leq STINGYSAT$ and because $SAT$ is NP-complete, $STINGYSAT$ must be as
+well.
+
+\myskip
+
+\solution{3} \textbf{Decision vs. Search.}
+
+The first task in the algorithm is to find the unique variables in the given
+clause $\phi$. To do this we use the python \texttt{set} data structure, which
+holds unique values. At this point, we do not care about whether the variable
+is negated or not so we use the built-in \texttt{abs} function to prevent adding
+$1$ and $-1$ to our set of variables, since those are actually the same, only
+it is negated. Below is our function for finding the unique variables:
+
 \begin{verbatim}
 def findvars(formula):
     thevars = set([])
@@ -34,33 +77,27 @@ def findvars(formula):
             thevars.add(abs(item))
 
     return list(thevars)
+\end{verbatim}
 
+The second utility function is called \texttt{setvartrue}. This function will
+manipulate the formula to make a certain expression in a clause be true. It is
+slightly different from making the variable itself be true, in that forcing $-1$
+to be true means that $1$ will actually be false so that ``not $1$'' will
+evaluate to true. Over the course of setting variables to true, we may create a
+clause that will always be false, and therefore make $\phi$ unsatisfiable. In
+our formula this is represented by an empty clause, because once we force an
+expression to be true, we eliminate its opposite from all the clauses. As an
+example, if we force $3$ to be true in the formula, then all instances of $-3$
+must be false since ``not true'' is obviously false. Since these opposite
+expressions effectively do nothing for the clause, we remove them. Removing them
+is beneficial since if all of the expressions are false we will have an empty
+list in our formula which is simple to check for. As we said before, if we end
+up with an empty clause we know that those values for the variables do not
+satisfy the original formula.
 
+Here is our implementation:
 
-def findsatisfying(formula):
-    if not satdecide(formula):
-        return 'UNSAT'
-
-    ans = []
-    variables = findvars(formula)
-    form = copy.deepcopy(formula)
-    for var in variables:
-        f = setvartrue(form, var)
-        if f == "UNSAT":
-            f = setvartrue(form, -var)
-            if f == "UNSAT":
-                return "UNSAT"
-            else:
-                ans.append(-var)
-                form = f
-        else:
-            ans.append(var)
-            form = f
-
-    return ans
-
-
-
+\begin{verbatim} 
 def setvartrue(formula, x):
     f = copy.deepcopy(formula)
     for l in f:
@@ -69,9 +106,47 @@ def setvartrue(formula, x):
                 l.remove(item)
 
         if len(l) == 0:
-            return "UNSAT"
+            return `UNSAT'
 
     return f
 \end{verbatim}
 
+The final function is a basic way to implement the actual solving functionality
+of a \texttt{SAT}-solver. The algorithm loops through the unique variables,
+testing them against the formula by forcing them to be true or false by using
+our \texttt{setvartrue} function from earlier. This function returns a whole new
+formula that assumes the truth of the current variable. We then use
+\textit{that} formula as the basis for testing the next variable. Once we decide
+what a certain variable's value should be (because \texttt{setvartrue} did not
+return \texttt{`UNSAT'}), we add that variable to the \texttt{ans} list which we
+return at the end as the proper values which will satisfy the given formula.
+
+Ideally we should never return \texttt{`UNSAT'} from within the \texttt{for}
+loop because if we make it to the loop, that means the \texttt{SAT}-solver
+library has determined the formula to be satisfiable. Here is our
+implementation:
+
+\begin{verbatim}
+def findsatisfying(formula):
+    if not satdecide(formula):
+        return `UNSAT'
+
+    ans = []
+    variables = findvars(formula)
+    form = copy.deepcopy(formula)
+    for var in variables:
+        f = setvartrue(form, var)
+        if f == `UNSAT':
+            f = setvartrue(form, -var)
+            if f == `UNSAT':
+                return `UNSAT'
+            else:
+                ans.append(-var)
+                form = f
+        else:
+            ans.append(var)
+            form = f
+
+    return ans
+\end{verbatim}
 \end{document}

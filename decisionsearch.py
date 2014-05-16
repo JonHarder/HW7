@@ -35,10 +35,10 @@ def findsatisfying(formula):
 	form = copy.deepcopy(formula)
 	for var in variables:
 		f = setvartrue(form, var)
-		if f == "UNSAT":
+		if f == 'UNSAT':
 			f = setvartrue(form, -var)
-			if f == "UNSAT":
-				return "UNSAT"
+			if f == 'UNSAT':
+				return 'UNSAT'
 			else:
 				ans.append(-var)
 				form = f
@@ -62,6 +62,6 @@ def setvartrue(formula, x):
 				l.remove(item)
 
 		if len(l) == 0:
-			return "UNSAT"
+			return 'UNSAT'
 
 	return f
